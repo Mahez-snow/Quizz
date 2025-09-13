@@ -58,19 +58,19 @@
     <div id="student-form">
       <div class="mb-3">
         <label class="form-label">Full Name</label>
-        <input type="text" class="form-control" id="name" required>
+        <input type="text" class="form-control" id="name" required autocomplete="off">
       </div>
       <div class="mb-3">
         <label class="form-label">Register No</label>
-        <input type="text" class="form-control" id="register_no" required>
+        <input type="text" class="form-control" id="register_no" required autocomplete="off">
       </div>
       <div class="mb-3">
         <label class="form-label">Department</label>
-        <input type="text" class="form-control" id="department" required>
+        <input type="text" class="form-control" id="department" required autocomplete="off">
       </div>
       <div class="mb-3">
         <label class="form-label">Year</label>
-        <input type="text" class="form-control" id="year" required>
+        <input type="text" class="form-control" id="year" required autocomplete="off">
       </div>
       <button class="btn btn-custom w-100" onclick="startQuiz()">🚀 Start Quiz</button>
     </div>
@@ -161,16 +161,43 @@
 
       const time_taken = Math.floor((Date.now() - startTime) / 1000);
 
-      const res = await fetch("http://localhost:3000/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, register_no, department, year, score, time_taken })
-      });
+      try {
+        const res = await fetch("https://YOUR_RENDER_URL.onrender.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, register_no, department, year, score, time_taken })
+        });
 
-      const data = await res.json();
-      alert("Quiz submitted! ✅ Your score: " + score);
-      window.location.reload();
+        const data = await res.json();
+        alert("Quiz submitted! ✅ Your score: " + score);
+        window.location.reload();
+      } catch (err) {
+        alert("❌ Error submitting quiz: " + err.message);
+      }
     }
+    // Disable right click
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    alert("🚫 Right click disabled!");
+  });
+
+  // Disable some common shortcuts like Ctrl+C, Ctrl+U, F12
+  document.addEventListener('keydown', function(e) {
+    if (
+      (e.ctrlKey && (e.key === 'u' || e.key === 'U')) || // View source
+      (e.ctrlKey && (e.key === 'c' || e.key === 'C')) || // Copy
+      (e.ctrlKey && (e.key === 's' || e.key === 'S')) || // Save
+      (e.key === "F12") // Dev tools
+    ) {
+      e.preventDefault();
+      alert("🚫 This action is disabled!");
+    }
+  });
+ const res = await fetch("https://quizz-arm7.onrender.com/submit", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name, register_no, department, year, score, time_taken })
+});
   </script>
 </body>
 </html>
