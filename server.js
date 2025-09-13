@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname,index.html)));
+app.use(express.static(path.join(__dirname, "public")));
 
 // PostgreSQL connection from .env
 const pool = new Pool({
