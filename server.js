@@ -10,20 +10,20 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static("public")); // Serve static files from public folder
 
-// ✅ Use DATABASE_URL from environment variables
+// ✅ PostgreSQL connection using environment variable
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ✅ Create table if it does not exist
+// ✅ Create table if it doesn't exist
 pool.query(
   `CREATE TABLE IF NOT EXISTS results (
       id SERIAL PRIMARY KEY,
       name VARCHAR(100),
       register_no VARCHAR(50),
       department VARCHAR(100),
-      year VARCHAR(50),
+      year VARCHAR(10),
       score INT,
       time_taken INT
    )`,
@@ -64,5 +64,5 @@ app.get("/results", async (req, res) => {
 
 // ✅ Start server
 app.listen(port, () => {
-  console.log(🚀 Server running at http://localhost:${port});
+  console.log('🚀 Server running at http://localhost:${port}');
 });
