@@ -2,26 +2,30 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
 const cors = require("cors");
-require("dotenv").config();  // ✅ Load .env file
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static("public")); // Serve static files from public folder
 
-// ✅ PostgreSQL connection (from .env)
+// ✅ Use DATABASE_URL from environment variables
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false }
 });
 
-// ✅ Create table if not exists
+// ✅ Create table if it does not exist
 pool.query(
   `CREATE TABLE IF NOT EXISTS results (
       id SERIAL PRIMARY KEY,
       name VARCHAR(100),
-      score INT
+      register_no VARCHAR(50),
+      department VARCHAR(100),
+      year VARCHAR(50),
+      score INT,
+      time_taken INT
    )`,
   (err) => {
     if (err) {
@@ -32,18 +36,18 @@ pool.query(
   }
 );
 
-// ✅ API to submit results
+// ✅ API to submit quiz results
 app.post("/submit", async (req, res) => {
-  const { name, score } = req.body;
+  const { name, register_no, department, year, score, time_taken } = req.body;
   try {
-    await pool.query("INSERT INTO results (name, score) VALUES ($1, $2)", [
-      name,
-      score,
-    ]);
-    res.send("Result saved!");
+    await pool.query(
+      "INSERT INTO results (name, register_no, department, year, score, time_taken) VALUES ($1, $2, $3, $4, $5, $6)",
+      [name, register_no, department, year, score, time_taken]
+    );
+    res.json({ message: "Result saved!" });
   } catch (err) {
     console.error("❌ Error saving result:", err);
-    res.status(500).send("Error saving result");
+    res.status(500).json({ error: "Error saving result" });
   }
 });
 
@@ -54,10 +58,11 @@ app.get("/results", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("❌ Error fetching results:", err);
-    res.status(500).send("Error fetching results");
+    res.status(500).json({ error: "Error fetching results" });
   }
 });
 
+// ✅ Start server
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(🚀 Server running at http://localhost:${port});
 });
