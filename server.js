@@ -1,82 +1,77 @@
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
-const cors = require("cors");
 const bodyParser = require("body-parser");
+const { Pool } = require("pg");
+const cors = require("cors");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 3000;  // 👈 use Render's dynamic port
 
-// Middleware
-app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname)));
+app.use(cors());
 
-// Connect to SQLite
-const db = new sqlite3.Database("./quiz.db", (err) => {
-  if (err) {
-    console.error("❌ Database connection failed:", err.message);
-  } else {
-    console.log("✅ Connected to SQLite database.");
-  }
+// ✅ Serve static frontend files from "public" folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// ✅ PostgreSQL connection (Render DB)
+const pool = new Pool({
+  connectionString: "postgresql://quiz_db_lndr_user:NksEVvuJgJtgyrzVXMWVb9B1GfLi7nTx@dpg-d32h8d8dl3ps7383h4rg-a.oregon-postgres.render.com/quiz_db_lndr",
+  ssl: { rejectUnauthorized: false }
 });
 
-// Create table (with UNIQUE register number)
-db.run(
-  `CREATE TABLE IF NOT EXISTS students (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    regno TEXT UNIQUE,
-    department TEXT,
-    year TEXT,
-    score INTEGER
-  )`
+// ✅ Create table if not exists
+pool.query(
+  `CREATE TABLE IF NOT EXISTS results (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100),
+      register_no VARCHAR(50),
+      department VARCHAR(100),
+      year VARCHAR(20),
+      score INT,
+      time_taken INT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   )`,
+  (err) => {
+    if (err) {
+      console.error("❌ Error creating table:", err);
+    } else {
+      console.log("✅ Table ready!");
+    }
+  }
 );
 
-// API: Quiz submission
-app.post("/submit", (req, res) => {
-  const { name, regno, department, year, score } = req.body;
-
-  if (!name || !regno || !department || !year || score === undefined) {
-    return res.status(400).json({ error: "❌ Missing required fields!" });
+// ✅ API to submit results
+app.post("/submit", async (req, res) => {
+  const { name, register_no, department, year, score, time_taken } = req.body;
+  try {
+    await pool.query(
+      "INSERT INTO results (name, register_no, department, year, score, time_taken) VALUES ($1, $2, $3, $4, $5, $6)",
+      [name, register_no, department, year, score, time_taken]
+    );
+    res.json({ success: true, message: "Result saved!" });
+  } catch (err) {
+    console.error("❌ Error saving result:", err);
+    res.status(500).send("Error saving result");
   }
-
-  // Check if already attempted
-  const checkQuery = `SELECT * FROM students WHERE regno = ?`;
-  db.get(checkQuery, [regno], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    if (row) {
-      return res.json({
-        message: "⚠️ You have already attempted the quiz!",
-        already: true,
-      });
-    }
-
-    // If not attempted → insert record
-    const insert = `INSERT INTO students (name, regno, department, year, score) VALUES (?,?,?,?,?)`;
-    db.run(insert, [name, regno, department, year, score], function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ message: "✅ Quiz submitted successfully!", already: false });
-    });
-  });
 });
 
-// API: Get all results
-app.get("/results", (req, res) => {
-  db.all("SELECT * FROM students", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+// ✅ API to fetch results
+app.get("/results", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM results ORDER BY created_at DESC");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Error fetching results:", err);
+    res.status(500).send("Error fetching results");
+  }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+// ✅ Catch-all: serve index.html for any unknown route (important for frontend)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ✅ Start server
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
