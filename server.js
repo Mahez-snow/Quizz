@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname)));
 
 // PostgreSQL connection from .env
 const pool = new Pool({
@@ -41,7 +41,7 @@ pool.query(
 );
 
 // API to submit results
-app.post("/submit", async (req, res) => {
+app.post("https://YOUR_RENDER_URL.onrender.com/submit", async (req, res) => {
   const { name, register_no, department, year, score, time_taken } = req.body;
   try {
     // Prevent duplicate attempts

@@ -128,7 +128,7 @@
     function startQuiz() {
       document.getElementById("student-form").classList.add("d-none");
       document.getElementById("quiz").classList.remove("d-none");
-
+      
       startTime = Date.now();
       timer = setInterval(updateTimer, 1000);
     }
@@ -169,8 +169,8 @@
         });
 
         const data = await res.json();
-        alert("Quiz submitted! ✅ Your score: " + score);
-        window.location.reload();
+        alert("Quiz submitted! ✅");
+        //window.location.reload();
       } catch (err) {
         alert("❌ Error submitting quiz: " + err.message);
       }
@@ -193,11 +193,11 @@
       alert("🚫 This action is disabled!");
     }
   });
- const res = await fetch("https://quizz-arm7.onrender.com/submit", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ name, register_no, department, year, score, time_taken })
-});
+ //const res = await fetch("https://quizz-arm7.onrender.com/submit", {
+  //method: "POST",
+  //headers: { "Content-Type": "application/json" },
+  //body: JSON.stringify({ name, register_no, department, year, score, time_taken })
+//});
   </script>
 </body>
 </html>
