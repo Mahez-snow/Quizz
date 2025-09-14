@@ -39,9 +39,32 @@ pool.query(
     }
   }
 );
+app.post("/submit", async (req, res) => {
+  const { name, register_no, department, year, score, time_taken } = req.body;
+  try {
+    const existing = await pool.query(
+      "SELECT * FROM results WHERE register_no = $1",
+      [register_no]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: "You have already submitted the quiz!" });
+    }
+
+    await pool.query(
+      "INSERT INTO results (name, register_no, department, year, score, time_taken) VALUES ($1,$2,$3,$4,$5,$6)",
+      [name, register_no, department, year, score, time_taken]
+    );
+
+    res.json({ message: "Result saved!" });  // ✅ send JSON
+  } catch (err) {
+    console.error("❌ Error saving result:", err);
+    res.status(500).json({ error: "Error saving result" });  // ✅ send JSON
+  }
+});
 
 // API to submit results
-app.post("/submit", async (req, res) => {
+/*app.post("/submit", async (req, res) => {
   const { name, register_no, department, year, score, time_taken } = req.body;
   try {
     // Prevent duplicate attempts
@@ -62,7 +85,7 @@ app.post("/submit", async (req, res) => {
     console.error("❌ Error saving result:", err);
     res.status(500).send("Error saving result");
   }
-});
+});*/
 
 // API to get all results
 app.get("/results", async (req, res) => {
