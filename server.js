@@ -41,7 +41,7 @@ pool.query(
 );
 
 // API to submit results
-app.post("https://YOUR_RENDER_URL.onrender.com/submit", async (req, res) => {
+app.post("/submit", async (req, res) => {
   const { name, register_no, department, year, score, time_taken } = req.body;
   try {
     // Prevent duplicate attempts

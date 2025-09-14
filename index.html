@@ -162,7 +162,7 @@
       const time_taken = Math.floor((Date.now() - startTime) / 1000);
 
       try {
-        const res = await fetch("https://YOUR_RENDER_URL.onrender.com/submit", {
+        const res = await fetch("https://quizz-arm7.onrender.com/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, register_no, department, year, score, time_taken })
