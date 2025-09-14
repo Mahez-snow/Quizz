@@ -64,28 +64,7 @@ app.post("/submit", async (req, res) => {
 });
 
 // API to submit results
-/*app.post("/submit", async (req, res) => {
-  const { name, register_no, department, year, score, time_taken } = req.body;
-  try {
-    // Prevent duplicate attempts
-    const existing = await pool.query(
-      "SELECT * FROM results WHERE register_no = $1",
-      [register_no]
-    );
-    if (existing.rows.length > 0) {
-      return res.status(400).send("You have already submitted the quiz!");
-    }
 
-    await pool.query(
-      "INSERT INTO results (name, register_no, department, year, score, time_taken) VALUES ($1,$2,$3,$4,$5,$6)",
-      [name, register_no, department, year, score, time_taken]
-    );
-    res.send("Result saved!");
-  } catch (err) {
-    console.error("❌ Error saving result:", err);
-    res.status(500).send("Error saving result");
-  }
-});*/
 
 // API to get all results
 app.get("/results", async (req, res) => {
@@ -104,5 +83,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log('🚀 Server running at http://localhost:${port}');
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
